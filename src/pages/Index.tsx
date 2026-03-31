@@ -1,16 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import AppSidebar from "@/components/AppSidebar";
+import DashboardOverview from "@/components/DashboardOverview";
+import TaskManager from "@/components/TaskManager";
+import CalendarView from "@/components/CalendarView";
+import QuickLinks from "@/components/QuickLinks";
+import GoalsTracker from "@/components/GoalsTracker";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals";
+
+const Index = () => {
+  const [activeView, setActiveView] = useState<View>("dashboard");
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex h-screen overflow-hidden">
+      <AppSidebar activeView={activeView} onViewChange={setActiveView} />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-6 lg:p-8">
+          {activeView === "dashboard" && <DashboardOverview onNavigate={setActiveView} />}
+          {activeView === "tasks" && <TaskManager />}
+          {activeView === "calendar" && <CalendarView />}
+          {activeView === "links" && <QuickLinks />}
+          {activeView === "goals" && <GoalsTracker />}
+        </div>
+      </main>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
