@@ -5,12 +5,12 @@ import {
   Calendar,
   Link2,
   Target,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals";
-
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study";
 interface AppSidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
