@@ -5,12 +5,12 @@ import {
   Calendar,
   Link2,
   Target,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals";
-
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study";
 interface AppSidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
@@ -22,6 +22,7 @@ const navItems: { id: View; label: string; icon: React.ElementType }[] = [
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "goals", label: "Goals", icon: Target },
   { id: "links", label: "Quick Links", icon: Link2 },
+  { id: "study", label: "Study Tools", icon: BookOpen },
 ];
 
 const AppSidebar = ({ activeView, onViewChange }: AppSidebarProps) => {

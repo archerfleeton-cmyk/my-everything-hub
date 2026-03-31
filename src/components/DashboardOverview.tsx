@@ -14,7 +14,7 @@ const today = new Date().toLocaleDateString("en-US", {
 });
 
 interface DashboardOverviewProps {
-  onNavigate: (view: "tasks" | "calendar" | "goals" | "links") => void;
+  onNavigate: (view: "tasks" | "calendar" | "goals" | "links" | "study") => void;
 }
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
