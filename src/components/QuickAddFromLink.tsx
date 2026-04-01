@@ -1,0 +1,142 @@
+import { useState } from "react";
+import { Link2, Plus, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
+interface ParsedItem {
+  title: string;
+  source: string;
+  url: string;
+  icon: string;
+}
+
+function detectGoogleService(url: string): { source: string; icon: string } | null {
+  if (url.includes("classroom.google.com")) return { source: "Google Classroom", icon: "📚" };
+  if (url.includes("mail.google.com")) return { source: "Gmail", icon: "📧" };
+  if (url.includes("drive.google.com")) return { source: "Google Drive", icon: "📁" };
+  if (url.includes("docs.google.com/document")) return { source: "Google Docs", icon: "📝" };
+  if (url.includes("docs.google.com/presentation")) return { source: "Google Slides", icon: "📊" };
+  if (url.includes("docs.google.com/spreadsheets")) return { source: "Google Sheets", icon: "📈" };
+  if (url.includes("sites.google.com")) return { source: "Google Sites", icon: "🌐" };
+  if (url.includes("calendar.google.com")) return { source: "Google Calendar", icon: "📅" };
+  return null;
+}
+
+function extractTitleFromUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const pathParts = u.pathname.split("/").filter(Boolean);
+    // Try to get a readable name from the path
+    const last = pathParts[pathParts.length - 1];
+    if (last && last !== "d" && last !== "edit" && last.length > 3) {
+      return decodeURIComponent(last).replace(/[-_]/g, " ");
+    }
+    return "Untitled item";
+  } catch {
+    return "Untitled item";
+  }
+}
+
+const QuickAddFromLink = () => {
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [savedLinks, setSavedLinks] = useState<ParsedItem[]>([]);
+
+  const handleAdd = () => {
+    if (!url.trim()) {
+      toast.error("Please paste a Google link");
+      return;
+    }
+
+    const service = detectGoogleService(url);
+    if (!service) {
+      toast.error("Please paste a link from Google Classroom, Gmail, Drive, Docs, Slides, or Sites");
+      return;
+    }
+
+    const itemTitle = title.trim() || extractTitleFromUrl(url);
+    const item: ParsedItem = {
+      title: itemTitle,
+      source: service.source,
+      url: url.trim(),
+      icon: service.icon,
+    };
+
+    setSavedLinks((prev) => [item, ...prev]);
+    setUrl("");
+    setTitle("");
+    toast.success(`Added from ${service.source}`);
+  };
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h2 className="text-2xl font-serif text-foreground">Quick Add</h2>
+        <p className="text-muted-foreground text-sm mt-1">
+          Paste Google links to save assignments, docs, and resources
+        </p>
+      </div>
+
+      {/* Add form */}
+      <div className="p-4 rounded-xl bg-card border border-border space-y-3">
+        <div className="flex items-center gap-2">
+          <Link2 size={16} className="text-muted-foreground shrink-0" />
+          <Input
+            placeholder="Paste a Google Classroom, Drive, Docs, or Gmail link..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Title (optional — auto-detected from link)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          />
+          <Button onClick={handleAdd} size="sm" className="shrink-0">
+            <Plus size={16} className="mr-1" /> Add
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Supports: Google Classroom, Gmail, Drive, Docs, Slides, Sheets, Sites, Calendar
+        </p>
+      </div>
+
+      {/* Saved links */}
+      {savedLinks.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-foreground">Saved Links</h3>
+          {savedLinks.map((item, i) => (
+            <a
+              key={i}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
+            >
+              <span className="text-xl">{item.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                <p className="text-xs text-muted-foreground">{item.source}</p>
+              </div>
+              <ExternalLink size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+            </a>
+          ))}
+        </div>
+      )}
+
+      {savedLinks.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Link2 size={32} className="mx-auto mb-3 opacity-40" />
+          <p className="text-sm">No links saved yet</p>
+          <p className="text-xs mt-1">Paste a Google link above to get started</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default QuickAddFromLink;

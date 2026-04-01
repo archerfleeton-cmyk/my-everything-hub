@@ -8,9 +8,10 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  ClipboardPaste,
 } from "lucide-react";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study";
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
 interface AppSidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
@@ -21,6 +22,7 @@ const navItems: { id: View; label: string; icon: React.ElementType }[] = [
   { id: "tasks", label: "Tasks", icon: CheckSquare },
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "goals", label: "Goals", icon: Target },
+  { id: "quickadd", label: "Quick Add", icon: ClipboardPaste },
   { id: "links", label: "Quick Links", icon: Link2 },
   { id: "study", label: "Study Tools", icon: BookOpen },
 ];

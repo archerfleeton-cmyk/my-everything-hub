@@ -6,8 +6,9 @@ import CalendarView from "@/components/CalendarView";
 import QuickLinks from "@/components/QuickLinks";
 import GoalsTracker from "@/components/GoalsTracker";
 import StudyTools from "@/components/StudyTools";
+import QuickAddFromLink from "@/components/QuickAddFromLink";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study";
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
 
 const Index = () => {
   const [activeView, setActiveView] = useState<View>("dashboard");
@@ -22,6 +23,7 @@ const Index = () => {
           {activeView === "calendar" && <CalendarView />}
           {activeView === "links" && <QuickLinks />}
           {activeView === "goals" && <GoalsTracker />}
+          {activeView === "quickadd" && <QuickAddFromLink />}
           {activeView === "study" && <StudyTools />}
         </div>
       </main>
