@@ -10,7 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study";
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
 interface AppSidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
