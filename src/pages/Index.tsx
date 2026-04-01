@@ -23,6 +23,7 @@ const Index = () => {
           {activeView === "calendar" && <CalendarView />}
           {activeView === "links" && <QuickLinks />}
           {activeView === "goals" && <GoalsTracker />}
+          {activeView === "quickadd" && <QuickAddFromLink />}
           {activeView === "study" && <StudyTools />}
         </div>
       </main>
