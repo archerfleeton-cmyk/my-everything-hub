@@ -8,6 +8,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  ClipboardPaste,
 } from "lucide-react";
 
 type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
