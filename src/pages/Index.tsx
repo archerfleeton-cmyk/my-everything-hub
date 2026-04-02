@@ -7,6 +7,7 @@ import QuickLinks from "@/components/QuickLinks";
 import GoalsTracker from "@/components/GoalsTracker";
 import StudyTools from "@/components/StudyTools";
 import QuickAddFromLink from "@/components/QuickAddFromLink";
+import { EditModeProvider } from "@/components/EditModeContext";
 
 type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
 
@@ -14,20 +15,22 @@ const Index = () => {
   const [activeView, setActiveView] = useState<View>("dashboard");
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <AppSidebar activeView={activeView} onViewChange={setActiveView} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-6 lg:p-8">
-          {activeView === "dashboard" && <DashboardOverview onNavigate={setActiveView} />}
-          {activeView === "tasks" && <TaskManager />}
-          {activeView === "calendar" && <CalendarView />}
-          {activeView === "links" && <QuickLinks />}
-          {activeView === "goals" && <GoalsTracker />}
-          {activeView === "quickadd" && <QuickAddFromLink />}
-          {activeView === "study" && <StudyTools />}
-        </div>
-      </main>
-    </div>
+    <EditModeProvider>
+      <div className="flex h-screen overflow-hidden">
+        <AppSidebar activeView={activeView} onViewChange={setActiveView} />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-6 lg:p-8">
+            {activeView === "dashboard" && <DashboardOverview onNavigate={setActiveView} />}
+            {activeView === "tasks" && <TaskManager />}
+            {activeView === "calendar" && <CalendarView />}
+            {activeView === "links" && <QuickLinks />}
+            {activeView === "goals" && <GoalsTracker />}
+            {activeView === "quickadd" && <QuickAddFromLink />}
+            {activeView === "study" && <StudyTools />}
+          </div>
+        </main>
+      </div>
+    </EditModeProvider>
   );
 };
 
