@@ -9,7 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardPaste,
+  Pencil,
 } from "lucide-react";
+import { useEditMode } from "@/components/EditModeContext";
 
 type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
 interface AppSidebarProps {
@@ -29,6 +31,7 @@ const navItems: { id: View; label: string; icon: React.ElementType }[] = [
 
 const AppSidebar = ({ activeView, onViewChange }: AppSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const { editMode, toggleEditMode } = useEditMode();
 
   return (
     <aside
@@ -71,10 +74,24 @@ const AppSidebar = ({ activeView, onViewChange }: AppSidebarProps) => {
         })}
       </nav>
 
+      <div className="p-2 border-t border-border">
+        <button
+          onClick={toggleEditMode}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            editMode
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+        >
+          <Pencil size={18} />
+          {!collapsed && <span>{editMode ? "Exit Edit Mode" : "Edit Mode"}</span>}
+        </button>
+      </div>
+
       <div className="p-4 border-t border-border">
         {!collapsed && (
           <p className="text-xs text-muted-foreground">
-            Your personal command center
+            {editMode ? "✏️ Editing — tap anything to change it" : "Your personal command center"}
           </p>
         )}
       </div>
