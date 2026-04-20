@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CheckSquare, Calendar, Target, Link2, Zap, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
+import { useWeeklySchedule, ScheduleEntry, WeekSchedule } from "@/hooks/useWeeklySchedule";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -15,59 +16,11 @@ const today = new Date().toLocaleDateString("en-US", {
   day: "numeric",
 });
 
-interface ScheduleEntry {
-  id: string;
-  time: string;
-  title: string;
-  color: string;
-}
-
-type WeekSchedule = Record<number, ScheduleEntry[]>;
-
 interface DashboardOverviewProps {
   onNavigate: (view: "tasks" | "calendar" | "goals" | "links" | "study") => void;
 }
 
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-const defaultWeek: WeekSchedule = {
-  0: [ // Sunday - Legs
-    { id: "s1", time: "9:00 AM", title: "Leg Day Workout", color: "bg-fitness" },
-    { id: "s2", time: "12:00 PM", title: "Meal Prep", color: "bg-chore" },
-    { id: "s3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
-  ],
-  1: [ // Monday - Rest
-    { id: "m1", time: "7:00 AM", title: "Light stretching", color: "bg-fitness" },
-    { id: "m2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-    { id: "m3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
-  ],
-  2: [ // Tuesday - Upper
-    { id: "t1", time: "7:00 AM", title: "Upper Body Workout", color: "bg-fitness" },
-    { id: "t2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-    { id: "t3", time: "2:00 PM", title: "Study Group", color: "bg-info" },
-    { id: "t4", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
-  ],
-  3: [ // Wednesday - Lower
-    { id: "w1", time: "7:00 AM", title: "Lower Body Workout", color: "bg-fitness" },
-    { id: "w2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-    { id: "w3", time: "4:00 PM", title: "Soccer Practice", color: "bg-sport" },
-  ],
-  4: [ // Thursday - Rest
-    { id: "th1", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-    { id: "th2", time: "2:00 PM", title: "Study Group", color: "bg-info" },
-    { id: "th3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
-  ],
-  5: [ // Friday - Push
-    { id: "f1", time: "7:00 AM", title: "Push Day Workout", color: "bg-fitness" },
-    { id: "f2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-    { id: "f3", time: "5:00 PM", title: "Game Night", color: "bg-sport" },
-  ],
-  6: [ // Saturday - Pull
-    { id: "sa1", time: "9:00 AM", title: "Pull Day Workout", color: "bg-fitness" },
-    { id: "sa2", time: "12:00 PM", title: "Errands", color: "bg-chore" },
-    { id: "sa3", time: "5:00 PM", title: "Soccer Game", color: "bg-sport" },
-  ],
-};
 
 const colorOptions = [
   { label: "Fitness", value: "bg-fitness" },
