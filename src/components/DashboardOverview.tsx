@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CheckSquare, Calendar, Target, Link2, Zap, Trash2, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckSquare, Calendar, Target, Link2, Zap, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
 
 const greeting = () => {
@@ -22,17 +22,52 @@ interface ScheduleEntry {
   color: string;
 }
 
+type WeekSchedule = Record<number, ScheduleEntry[]>;
+
 interface DashboardOverviewProps {
   onNavigate: (view: "tasks" | "calendar" | "goals" | "links" | "study") => void;
 }
 
-const defaultSchedule: ScheduleEntry[] = [
-  { id: "1", time: "7:00 AM", title: "Gym Session", color: "bg-fitness" },
-  { id: "2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
-  { id: "3", time: "2:00 PM", title: "Study Group", color: "bg-info" },
-  { id: "4", time: "4:00 PM", title: "Soccer Practice", color: "bg-sport" },
-  { id: "5", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
-];
+const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const defaultWeek: WeekSchedule = {
+  0: [ // Sunday - Legs
+    { id: "s1", time: "9:00 AM", title: "Leg Day Workout", color: "bg-fitness" },
+    { id: "s2", time: "12:00 PM", title: "Meal Prep", color: "bg-chore" },
+    { id: "s3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
+  ],
+  1: [ // Monday - Rest
+    { id: "m1", time: "7:00 AM", title: "Light stretching", color: "bg-fitness" },
+    { id: "m2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
+    { id: "m3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
+  ],
+  2: [ // Tuesday - Upper
+    { id: "t1", time: "7:00 AM", title: "Upper Body Workout", color: "bg-fitness" },
+    { id: "t2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
+    { id: "t3", time: "2:00 PM", title: "Study Group", color: "bg-info" },
+    { id: "t4", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
+  ],
+  3: [ // Wednesday - Lower
+    { id: "w1", time: "7:00 AM", title: "Lower Body Workout", color: "bg-fitness" },
+    { id: "w2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
+    { id: "w3", time: "4:00 PM", title: "Soccer Practice", color: "bg-sport" },
+  ],
+  4: [ // Thursday - Rest
+    { id: "th1", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
+    { id: "th2", time: "2:00 PM", title: "Study Group", color: "bg-info" },
+    { id: "th3", time: "6:00 PM", title: "Walk the dog", color: "bg-chore" },
+  ],
+  5: [ // Friday - Push
+    { id: "f1", time: "7:00 AM", title: "Push Day Workout", color: "bg-fitness" },
+    { id: "f2", time: "9:00 AM", title: "Classes begin", color: "bg-info" },
+    { id: "f3", time: "5:00 PM", title: "Game Night", color: "bg-sport" },
+  ],
+  6: [ // Saturday - Pull
+    { id: "sa1", time: "9:00 AM", title: "Pull Day Workout", color: "bg-fitness" },
+    { id: "sa2", time: "12:00 PM", title: "Errands", color: "bg-chore" },
+    { id: "sa3", time: "5:00 PM", title: "Soccer Game", color: "bg-sport" },
+  ],
+};
 
 const colorOptions = [
   { label: "Fitness", value: "bg-fitness" },
@@ -43,29 +78,58 @@ const colorOptions = [
   { label: "Finance", value: "bg-finance" },
 ];
 
+const STORAGE_KEY = "weekly-schedule-v1";
+const todayDayIndex = new Date().getDay();
+
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
-  const [schedule, setSchedule] = useState<ScheduleEntry[]>(defaultSchedule);
+  const [week, setWeek] = useState<WeekSchedule>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return defaultWeek;
+  });
+  const [viewDay, setViewDay] = useState<number>(todayDayIndex);
   const [showAdd, setShowAdd] = useState(false);
   const [newTime, setNewTime] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newColor, setNewColor] = useState("bg-primary");
   const { editMode } = useEditMode();
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(week));
+    } catch {}
+  }, [week]);
+
+  const schedule = week[viewDay] || [];
+
   const updateEntry = (id: string, field: keyof ScheduleEntry, value: string) => {
-    setSchedule(schedule.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+    setWeek({
+      ...week,
+      [viewDay]: schedule.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
+    });
   };
 
   const deleteEntry = (id: string) => {
-    setSchedule(schedule.filter((s) => s.id !== id));
+    setWeek({ ...week, [viewDay]: schedule.filter((s) => s.id !== id) });
   };
 
   const addEntry = () => {
     if (!newTitle.trim() || !newTime.trim()) return;
-    setSchedule([...schedule, { id: Date.now().toString(), time: newTime, title: newTitle, color: newColor }]);
+    setWeek({
+      ...week,
+      [viewDay]: [...schedule, { id: Date.now().toString(), time: newTime, title: newTitle, color: newColor }],
+    });
     setNewTime("");
     setNewTitle("");
     setShowAdd(false);
   };
+
+  const prevDay = () => setViewDay((d) => (d + 6) % 7);
+  const nextDay = () => setViewDay((d) => (d + 1) % 7);
+
+  const isToday = viewDay === todayDayIndex;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -88,16 +152,49 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <QuickStat icon={Link2} label="Quick Links" value="6 apps" accent="bg-accent/10 text-accent" onClick={() => onNavigate("links")} />
       </div>
 
-      {/* Today's Schedule */}
+      {/* Weekly Schedule Wheel */}
       <div className="bg-card rounded-xl border border-border p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif text-lg text-foreground">Today's Schedule</h3>
-          {editMode && (
+          <button onClick={prevDay} className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors">
+            <ChevronLeft size={18} />
+          </button>
+          <div className="text-center">
+            <h3 className="font-serif text-lg text-foreground">
+              {dayNames[viewDay]}
+              {isToday && <span className="ml-2 text-xs font-sans px-2 py-0.5 rounded-full bg-primary/10 text-primary">Today</span>}
+            </h3>
+          </div>
+          <button onClick={nextDay} className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors">
+            <ChevronRight size={18} />
+          </button>
+        </div>
+
+        {/* Day pill row */}
+        <div className="flex justify-between gap-1 mb-4">
+          {dayNames.map((name, i) => (
+            <button
+              key={i}
+              onClick={() => setViewDay(i)}
+              className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                i === viewDay
+                  ? "bg-primary text-primary-foreground"
+                  : i === todayDayIndex
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {name.slice(0, 3)}
+            </button>
+          ))}
+        </div>
+
+        {editMode && (
+          <div className="flex justify-end mb-3">
             <button onClick={() => setShowAdd(!showAdd)} className="p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90">
               <Plus size={16} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {showAdd && editMode && (
           <div className="flex gap-2 mb-4 flex-wrap">
@@ -111,6 +208,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         )}
 
         <div className="space-y-3">
+          {schedule.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No events scheduled. {editMode && "Tap + to add one."}</p>
+          )}
           {schedule.map((entry) => (
             <div key={entry.id} className="flex items-center gap-3">
               {editMode ? (
