@@ -55,6 +55,13 @@ const GoalsTracker = () => {
     setGoals(goals.filter((g) => g.id !== id));
   };
 
+  const addSuggestedGoal = (g: { title: string; category: GoalCategory; target: string }) => {
+    setGoals((prev) => [
+      ...prev,
+      { id: Date.now().toString(), title: g.title, category: g.category, progress: 0, target: g.target },
+    ]);
+  };
+
   const avgProgress = goals.length > 0 ? Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length) : 0;
 
   return (
@@ -110,6 +117,8 @@ const GoalsTracker = () => {
           </div>
         </div>
       )}
+
+      <GoalsCoach goals={goals} onAddGoal={addSuggestedGoal} />
 
       <div className="space-y-3">
         {goals.map((goal) => (
