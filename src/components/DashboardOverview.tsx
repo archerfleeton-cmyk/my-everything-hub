@@ -31,29 +31,16 @@ const colorOptions = [
   { label: "Finance", value: "bg-finance" },
 ];
 
-const STORAGE_KEY = "weekly-schedule-v1";
 const todayDayIndex = new Date().getDay();
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
-  const [week, setWeek] = useState<WeekSchedule>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return defaultWeek;
-  });
+  const { week, setWeek } = useWeeklySchedule();
   const [viewDay, setViewDay] = useState<number>(todayDayIndex);
   const [showAdd, setShowAdd] = useState(false);
   const [newTime, setNewTime] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newColor, setNewColor] = useState("bg-primary");
   const { editMode } = useEditMode();
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(week));
-    } catch {}
-  }, [week]);
 
   const schedule = week[viewDay] || [];
 
