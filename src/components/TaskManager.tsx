@@ -148,7 +148,7 @@ const TaskManager = () => {
       <div>
         <h2 className="text-2xl font-serif text-foreground">Tasks</h2>
         <p className="text-muted-foreground text-sm mt-1">
-          {completedCount}/{tasks.length} completed today
+          {completedCount}/{allTasks.length} completed today
         </p>
       </div>
 
@@ -156,7 +156,7 @@ const TaskManager = () => {
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-500"
-          style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
+          style={{ width: `${allTasks.length > 0 ? (completedCount / allTasks.length) * 100 : 0}%` }}
         />
       </div>
 
