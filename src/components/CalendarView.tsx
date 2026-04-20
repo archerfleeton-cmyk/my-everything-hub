@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
+import { useWeeklySchedule, colorToCalendarCategory } from "@/hooks/useWeeklySchedule";
 
 interface CalendarEvent {
   id: string;
