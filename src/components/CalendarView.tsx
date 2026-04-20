@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
+import { useWeeklySchedule, colorToCalendarCategory } from "@/hooks/useWeeklySchedule";
 
 interface CalendarEvent {
   id: string;
@@ -40,6 +41,7 @@ const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const CalendarView = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>(defaultEvents);
+  const { week } = useWeeklySchedule();
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDate, setNewDate] = useState(getDateStr(0));
@@ -58,9 +60,32 @@ const CalendarView = () => {
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let i = 1; i <= daysInMonth; i++) cells.push(i);
 
+  const scheduleEvents: CalendarEvent[] = useMemo(() => {
+    const out: CalendarEvent[] = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const dow = dateObj.getDay();
+      const entries = week[dow] || [];
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      entries.forEach((e) => {
+        out.push({
+          id: `sched-${dateStr}-${e.id}`,
+          title: e.title,
+          date: dateStr,
+          time: e.time,
+          category: colorToCalendarCategory(e.color),
+          color: e.color,
+        });
+      });
+    }
+    return out;
+  }, [week, year, month, daysInMonth]);
+
+  const allEvents = useMemo(() => [...scheduleEvents, ...events], [scheduleEvents, events]);
+
   const getEventsForDay = (day: number) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return events.filter((e) => e.date === dateStr);
+    return allEvents.filter((e) => e.date === dateStr);
   };
 
   const isToday = (day: number) =>
@@ -69,7 +94,8 @@ const CalendarView = () => {
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
-  const todayEvents = events.filter((e) => e.date === today.toISOString().split("T")[0]);
+  const todayDateStr = today.toISOString().split("T")[0];
+  const todayEvents = allEvents.filter((e) => e.date === todayDateStr);
 
   const addEvent = () => {
     if (!newTitle.trim()) return;

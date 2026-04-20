@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Check, Trash2, Clock, Calendar, Pencil } from "lucide-react";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useWeeklySchedule, parseTime12h, colorToCategory } from "@/hooks/useWeeklySchedule";
 
 type Category = "chore" | "sport" | "fitness" | "finance" | "health" | "personal";
 
@@ -59,6 +60,8 @@ function formatDate(date?: string): string {
 
 const TaskManager = () => {
   const [tasks, setTasks] = useState<Task[]>(defaultTasks);
+  const [completedSchedule, setCompletedSchedule] = useState<Record<string, boolean>>({});
+  const { week } = useWeeklySchedule();
   const [newTask, setNewTask] = useState("");
   const [newCategory, setNewCategory] = useState<Category>("chore");
   const [newTime, setNewTime] = useState("");
@@ -71,6 +74,20 @@ const TaskManager = () => {
   const [editTime, setEditTime] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editCategory, setEditCategory] = useState<Category>("chore");
+
+  // Schedule entries for today, mapped to Task shape (edit via Dashboard)
+  const scheduleTasks: Task[] = useMemo(() => {
+    const dow = new Date().getDay();
+    const entries = week[dow] || [];
+    return entries.map((e) => ({
+      id: `sched-${e.id}`,
+      title: e.title,
+      category: colorToCategory(e.color) as Category,
+      completed: !!completedSchedule[e.id],
+      time: parseTime12h(e.time),
+      date: todayStr(),
+    }));
+  }, [week, completedSchedule]);
 
   const addTask = () => {
     if (!newTask.trim()) return;
@@ -90,14 +107,21 @@ const TaskManager = () => {
   };
 
   const toggleTask = (id: string) => {
+    if (id.startsWith("sched-")) {
+      const realId = id.slice(6);
+      setCompletedSchedule((prev) => ({ ...prev, [realId]: !prev[realId] }));
+      return;
+    }
     setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
   };
 
   const deleteTask = (id: string) => {
+    if (id.startsWith("sched-")) return;
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
   const openEdit = (task: Task) => {
+    if (task.id.startsWith("sched-")) return;
     setEditingTask(task);
     setEditTitle(task.title);
     setEditTime(task.time || "");
@@ -115,15 +139,16 @@ const TaskManager = () => {
     setEditingTask(null);
   };
 
-  const filtered = filterCategory === "all" ? tasks : tasks.filter((t) => t.category === filterCategory);
-  const completedCount = tasks.filter((t) => t.completed).length;
+  const allTasks = useMemo(() => [...scheduleTasks, ...tasks], [scheduleTasks, tasks]);
+  const filtered = filterCategory === "all" ? allTasks : allTasks.filter((t) => t.category === filterCategory);
+  const completedCount = allTasks.filter((t) => t.completed).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
         <h2 className="text-2xl font-serif text-foreground">Tasks</h2>
         <p className="text-muted-foreground text-sm mt-1">
-          {completedCount}/{tasks.length} completed today
+          {completedCount}/{allTasks.length} completed today
         </p>
       </div>
 
@@ -131,7 +156,7 @@ const TaskManager = () => {
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-500"
-          style={{ width: `${tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0}%` }}
+          style={{ width: `${allTasks.length > 0 ? (completedCount / allTasks.length) * 100 : 0}%` }}
         />
       </div>
 
