@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, TrendingUp, Trash2 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
+import GoalsCoach from "@/components/GoalsCoach";
 
 type GoalCategory = "fitness" | "finance" | "health" | "personal";
 
