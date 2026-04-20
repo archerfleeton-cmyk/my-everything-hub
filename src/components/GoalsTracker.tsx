@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, TrendingUp, Trash2 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
+import GoalsCoach from "@/components/GoalsCoach";
 
 type GoalCategory = "fitness" | "finance" | "health" | "personal";
 
@@ -52,6 +53,13 @@ const GoalsTracker = () => {
 
   const deleteGoal = (id: string) => {
     setGoals(goals.filter((g) => g.id !== id));
+  };
+
+  const addSuggestedGoal = (g: { title: string; category: GoalCategory; target: string }) => {
+    setGoals((prev) => [
+      ...prev,
+      { id: Date.now().toString(), title: g.title, category: g.category, progress: 0, target: g.target },
+    ]);
   };
 
   const avgProgress = goals.length > 0 ? Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length) : 0;
@@ -109,6 +117,8 @@ const GoalsTracker = () => {
           </div>
         </div>
       )}
+
+      <GoalsCoach goals={goals} onAddGoal={addSuggestedGoal} />
 
       <div className="space-y-3">
         {goals.map((goal) => (
