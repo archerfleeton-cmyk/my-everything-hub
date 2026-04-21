@@ -172,12 +172,6 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <QuickAction emoji="📚" label="Google Classroom" href="https://classroom.google.com" />
-        <QuickAction emoji="✉️" label="Gmail" href="https://mail.google.com" />
-        <QuickAction emoji="📁" label="Google Drive" href="https://drive.google.com" />
-      </div>
     </div>
   );
 };
@@ -191,15 +185,6 @@ function QuickStat({ icon: Icon, label, value, accent, onClick }: { icon: React.
         <p className="text-sm font-semibold text-foreground mt-0.5">{value}</p>
       </div>
     </button>
-  );
-}
-
-function QuickAction({ emoji, label, href }: { emoji: string; label: string; href: string }) {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all">
-      <span className="text-xl">{emoji}</span>
-      <span className="text-sm font-medium text-foreground">{label}</span>
-    </a>
   );
 }
 

@@ -1,27 +1,10 @@
 import { useState } from "react";
 import { ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
-
-interface QuickLink {
-  id: string;
-  title: string;
-  description: string;
-  url: string;
-  icon: string;
-  bgColor: string;
-}
-
-const defaultLinks: QuickLink[] = [
-  { id: "1", title: "Google Classroom", description: "View assignments & classes", url: "https://classroom.google.com", icon: "📚", bgColor: "bg-sport/10" },
-  { id: "2", title: "Gmail", description: "Check your inbox", url: "https://mail.google.com", icon: "✉️", bgColor: "bg-destructive/10" },
-  { id: "3", title: "Google Drive", description: "Access your files", url: "https://drive.google.com", icon: "📁", bgColor: "bg-warning/10" },
-  { id: "4", title: "Google Docs", description: "Create & edit documents", url: "https://docs.google.com", icon: "📝", bgColor: "bg-info/10" },
-  { id: "5", title: "Google Slides", description: "Presentations & slide decks", url: "https://slides.google.com", icon: "📊", bgColor: "bg-accent/10" },
-  { id: "6", title: "Google Calendar", description: "Manage your schedule", url: "https://calendar.google.com", icon: "📅", bgColor: "bg-primary/10" },
-];
+import { useQuickLinks, QuickLink } from "@/hooks/useQuickLinks";
 
 const QuickLinks = () => {
-  const [links, setLinks] = useState<QuickLink[]>(defaultLinks);
+  const { links, setLinks } = useQuickLinks();
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
@@ -30,7 +13,11 @@ const QuickLinks = () => {
 
   const addLink = () => {
     if (!newTitle.trim() || !newUrl.trim()) return;
-    setLinks([...links, { id: Date.now().toString(), title: newTitle, description: "", url: newUrl, icon: newIcon, bgColor: "bg-primary/10" }]);
+    let url = newUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+    }
+    setLinks([...links, { id: Date.now().toString(), title: newTitle, description: "", url, icon: newIcon, bgColor: "bg-primary/10" }]);
     setNewTitle("");
     setNewUrl("");
     setNewIcon("🔗");
@@ -50,7 +37,7 @@ const QuickLinks = () => {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-serif text-foreground">Quick Links</h2>
-          <p className="text-muted-foreground text-sm mt-1">Jump to your favorite Google apps</p>
+          <p className="text-muted-foreground text-sm mt-1">Jump to your favorite sites and apps</p>
         </div>
         {editMode && (
           <button onClick={() => setShowAdd(!showAdd)} className="p-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
