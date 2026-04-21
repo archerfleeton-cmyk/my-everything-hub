@@ -188,13 +188,4 @@ function QuickStat({ icon: Icon, label, value, accent, onClick }: { icon: React.
   );
 }
 
-function QuickAction({ emoji, label, href }: { emoji: string; label: string; href: string }) {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all">
-      <span className="text-xl">{emoji}</span>
-      <span className="text-sm font-medium text-foreground">{label}</span>
-    </a>
-  );
-}
-
 export default DashboardOverview;
