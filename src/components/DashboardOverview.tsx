@@ -172,12 +172,6 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <QuickAction emoji="📚" label="Google Classroom" href="https://classroom.google.com" />
-        <QuickAction emoji="✉️" label="Gmail" href="https://mail.google.com" />
-        <QuickAction emoji="📁" label="Google Drive" href="https://drive.google.com" />
-      </div>
     </div>
   );
 };
