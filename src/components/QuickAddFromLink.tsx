@@ -3,13 +3,7 @@ import { Link2, Plus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-interface ParsedItem {
-  title: string;
-  source: string;
-  url: string;
-  icon: string;
-}
+import { useQuickLinks } from "@/hooks/useQuickLinks";
 
 function detectService(url: string): { source: string; icon: string } | null {
   // Check for Google services first
@@ -58,7 +52,10 @@ function extractTitleFromUrl(url: string): string {
 const QuickAddFromLink = () => {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
-  const [savedLinks, setSavedLinks] = useState<ParsedItem[]>([]);
+  const { links, addLink } = useQuickLinks();
+
+  // Show only the most recently added 5 links here for reference
+  const recentLinks = links.slice(-5).reverse();
 
   const handleAdd = () => {
     if (!url.trim()) {
@@ -79,17 +76,17 @@ const QuickAddFromLink = () => {
     }
 
     const itemTitle = title.trim() || extractTitleFromUrl(validatedUrl);
-    const item: ParsedItem = {
+    addLink({
       title: itemTitle,
-      source: service.source,
+      description: service.source,
       url: validatedUrl,
       icon: service.icon,
-    };
+      bgColor: "bg-primary/10",
+    });
 
-    setSavedLinks((prev) => [item, ...prev]);
     setUrl("");
     setTitle("");
-    toast.success(`Added from ${service.source}`);
+    toast.success(`Saved to Quick Links`);
   };
 
   return (
