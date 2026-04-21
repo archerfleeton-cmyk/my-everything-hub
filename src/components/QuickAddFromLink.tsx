@@ -94,7 +94,7 @@ const QuickAddFromLink = () => {
       <div>
         <h2 className="text-2xl font-serif text-foreground">Quick Add</h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Paste Google links to save assignments, docs, and resources
+          Paste any URL to save it to your Quick Links
         </p>
       </div>
 
@@ -121,17 +121,17 @@ const QuickAddFromLink = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Supports any website URL — Google Classroom, Gmail, Drive, Docs, YouTube, and more
+          Saved links appear in the Quick Links tab
         </p>
       </div>
 
-      {/* Saved links */}
-      {savedLinks.length > 0 && (
+      {/* Recently added */}
+      {recentLinks.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-foreground">Saved Links</h3>
-          {savedLinks.map((item, i) => (
+          <h3 className="text-sm font-semibold text-foreground">Recently Added</h3>
+          {recentLinks.map((item) => (
             <a
-              key={i}
+              key={item.id}
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -140,19 +140,11 @@ const QuickAddFromLink = () => {
               <span className="text-xl">{item.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                <p className="text-xs text-muted-foreground">{item.source}</p>
+                <p className="text-xs text-muted-foreground">{item.description}</p>
               </div>
               <ExternalLink size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
             </a>
           ))}
-        </div>
-      )}
-
-      {savedLinks.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Link2 size={32} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">No links saved yet</p>
-          <p className="text-xs mt-1">Paste a Google link above to get started</p>
         </div>
       )}
     </div>
