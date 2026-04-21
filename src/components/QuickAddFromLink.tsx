@@ -11,7 +11,8 @@ interface ParsedItem {
   icon: string;
 }
 
-function detectGoogleService(url: string): { source: string; icon: string } | null {
+function detectService(url: string): { source: string; icon: string } | null {
+  // Check for Google services first
   if (url.includes("classroom.google.com")) return { source: "Google Classroom", icon: "📚" };
   if (url.includes("mail.google.com")) return { source: "Gmail", icon: "📧" };
   if (url.includes("drive.google.com")) return { source: "Google Drive", icon: "📁" };
@@ -20,7 +21,23 @@ function detectGoogleService(url: string): { source: string; icon: string } | nu
   if (url.includes("docs.google.com/spreadsheets")) return { source: "Google Sheets", icon: "📈" };
   if (url.includes("sites.google.com")) return { source: "Google Sites", icon: "🌐" };
   if (url.includes("calendar.google.com")) return { source: "Google Calendar", icon: "📅" };
-  return null;
+  
+  // Generic URL detection for any other website
+  try {
+    const u = new URL(url);
+    const domain = u.hostname.replace(/^www\./, "");
+    const icon = "🔗";
+    
+    // Try to extract a friendly name from the domain
+    const name = domain
+      .split(".")[0]
+      .replace(/-/g, " ")
+      .replace(/^./, (c) => c.toUpperCase());
+    
+    return { source: name || domain, icon };
+  } catch {
+    return { source: "Website", icon: "🔗" };
+  }
 }
 
 function extractTitleFromUrl(url: string): string {
@@ -45,21 +62,27 @@ const QuickAddFromLink = () => {
 
   const handleAdd = () => {
     if (!url.trim()) {
-      toast.error("Please paste a Google link");
+      toast.error("Please paste a URL");
       return;
     }
 
-    const service = detectGoogleService(url);
+    // Basic URL validation
+    let validatedUrl = url.trim();
+    if (!validatedUrl.startsWith("http://") && !validatedUrl.startsWith("https://")) {
+      validatedUrl = "https://" + validatedUrl;
+    }
+
+    const service = detectService(validatedUrl);
     if (!service) {
-      toast.error("Please paste a link from Google Classroom, Gmail, Drive, Docs, Slides, or Sites");
+      toast.error("Please enter a valid URL");
       return;
     }
 
-    const itemTitle = title.trim() || extractTitleFromUrl(url);
+    const itemTitle = title.trim() || extractTitleFromUrl(validatedUrl);
     const item: ParsedItem = {
       title: itemTitle,
       source: service.source,
-      url: url.trim(),
+      url: validatedUrl,
       icon: service.icon,
     };
 
@@ -83,7 +106,7 @@ const QuickAddFromLink = () => {
         <div className="flex items-center gap-2">
           <Link2 size={16} className="text-muted-foreground shrink-0" />
           <Input
-            placeholder="Paste a Google Classroom, Drive, Docs, or Gmail link..."
+            placeholder="Paste any URL..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
@@ -101,7 +124,7 @@ const QuickAddFromLink = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Supports: Google Classroom, Gmail, Drive, Docs, Slides, Sheets, Sites, Calendar
+          Supports any website URL — Google Classroom, Gmail, Drive, Docs, YouTube, and more
         </p>
       </div>
 
