@@ -1,7 +1,38 @@
-import { useState } from "react";
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { ExternalLink, Plus, Trash2, Upload, X } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
 import { useQuickLinks, QuickLink } from "@/hooks/useQuickLinks";
+import { toast } from "@/hooks/use-toast";
+
+const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024; // 1.5MB raw upload guard
+
+const readFileAsDataURL = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+// Resize/compress to keep localStorage usage reasonable
+const compressImage = (dataUrl: string, maxSize = 256): Promise<string> =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return resolve(dataUrl);
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
 
 const QuickLinks = () => {
   const { links, setLinks } = useQuickLinks();
@@ -10,6 +41,7 @@ const QuickLinks = () => {
   const [newUrl, setNewUrl] = useState("");
   const [newIcon, setNewIcon] = useState("🔗");
   const { editMode } = useEditMode();
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const addLink = () => {
     if (!newTitle.trim() || !newUrl.trim()) return;
@@ -30,6 +62,28 @@ const QuickLinks = () => {
 
   const deleteLink = (id: string) => {
     setLinks(links.filter((l) => l.id !== id));
+  };
+
+  const handleImageUpload = async (id: string, file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({ title: "Image too large", description: "Please choose an image under 1.5MB.", variant: "destructive" });
+      return;
+    }
+    try {
+      const raw = await readFileAsDataURL(file);
+      const compressed = await compressImage(raw, 256);
+      setLinks(links.map((l) => (l.id === id ? { ...l, iconImage: compressed } : l)));
+    } catch {
+      toast({ title: "Upload failed", description: "Could not read image file.", variant: "destructive" });
+    }
+  };
+
+  const removeImage = (id: string) => {
+    setLinks(links.map((l) => (l.id === id ? { ...l, iconImage: undefined } : l)));
   };
 
   return (
@@ -56,6 +110,7 @@ const QuickLinks = () => {
             <input type="url" placeholder="URL" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground text-sm" />
             <button onClick={addLink} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Add</button>
           </div>
+          <p className="text-xs text-muted-foreground">Tip: After adding, you can upload a custom image icon below.</p>
         </div>
       )}
 
@@ -65,12 +120,53 @@ const QuickLinks = () => {
             {editMode ? (
               <div className="flex flex-col gap-2 p-4 rounded-xl bg-card border border-dashed border-primary/40">
                 <div className="flex items-center gap-2">
-                  <input value={link.icon} onChange={(e) => updateLink(link.id, "icon", e.target.value)} className="w-10 text-center text-xl bg-transparent" />
+                  <div className={`relative w-12 h-12 rounded-xl ${link.bgColor} flex items-center justify-center text-2xl shrink-0 overflow-hidden`}>
+                    {link.iconImage ? (
+                      <img src={link.iconImage} alt={`${link.title} icon`} className="w-full h-full object-cover" />
+                    ) : (
+                      <input
+                        value={link.icon}
+                        onChange={(e) => updateLink(link.id, "icon", e.target.value)}
+                        className="w-full h-full text-center text-xl bg-transparent focus:outline-none"
+                        aria-label="Emoji icon"
+                      />
+                    )}
+                  </div>
                   <input value={link.title} onChange={(e) => updateLink(link.id, "title", e.target.value)} className="flex-1 text-sm font-semibold text-foreground bg-transparent border-b border-dashed border-primary/40 focus:outline-none" />
-                  <button onClick={() => deleteLink(link.id)} className="p-1 text-muted-foreground hover:text-destructive"><Trash2 size={14} /></button>
+                  <button onClick={() => deleteLink(link.id)} className="p-1 text-muted-foreground hover:text-destructive" aria-label="Delete link"><Trash2 size={14} /></button>
                 </div>
                 <input value={link.description} onChange={(e) => updateLink(link.id, "description", e.target.value)} placeholder="Description" className="text-xs text-muted-foreground bg-transparent border-b border-dashed border-border focus:outline-none" />
                 <input value={link.url} onChange={(e) => updateLink(link.id, "url", e.target.value)} placeholder="URL" className="text-xs text-muted-foreground bg-transparent border-b border-dashed border-border focus:outline-none" />
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    ref={(el) => (fileInputs.current[link.id] = el)}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(link.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputs.current[link.id]?.click()}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground text-xs hover:opacity-90"
+                  >
+                    <Upload size={12} />
+                    {link.iconImage ? "Change image" : "Upload image"}
+                  </button>
+                  {link.iconImage && (
+                    <button
+                      type="button"
+                      onClick={() => removeImage(link.id)}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-muted-foreground text-xs hover:text-destructive"
+                    >
+                      <X size={12} /> Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <a
@@ -79,8 +175,12 @@ const QuickLinks = () => {
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-md transition-all"
               >
-                <div className={`w-12 h-12 rounded-xl ${link.bgColor} flex items-center justify-center text-2xl shrink-0`}>
-                  {link.icon}
+                <div className={`w-12 h-12 rounded-xl ${link.bgColor} flex items-center justify-center text-2xl shrink-0 overflow-hidden`}>
+                  {link.iconImage ? (
+                    <img src={link.iconImage} alt={`${link.title} icon`} className="w-full h-full object-cover" />
+                  ) : (
+                    link.icon
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
