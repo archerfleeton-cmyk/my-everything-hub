@@ -6,6 +6,7 @@ export interface QuickLink {
   description: string;
   url: string;
   icon: string;
+  iconImage?: string; // data URL for custom uploaded image
   bgColor: string;
 }
 
