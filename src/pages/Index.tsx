@@ -5,11 +5,10 @@ import TaskManager from "@/components/TaskManager";
 import CalendarView from "@/components/CalendarView";
 import QuickLinks from "@/components/QuickLinks";
 import GoalsTracker from "@/components/GoalsTracker";
-import StudyTools from "@/components/StudyTools";
 import QuickAddFromLink from "@/components/QuickAddFromLink";
 import { EditModeProvider } from "@/components/EditModeContext";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "quickadd";
 
 const Index = () => {
   const [activeView, setActiveView] = useState<View>("dashboard");
@@ -26,7 +25,6 @@ const Index = () => {
             {activeView === "links" && <QuickLinks />}
             {activeView === "goals" && <GoalsTracker />}
             {activeView === "quickadd" && <QuickAddFromLink />}
-            {activeView === "study" && <StudyTools />}
           </div>
         </main>
       </div>
