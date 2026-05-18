@@ -17,7 +17,7 @@ const today = new Date().toLocaleDateString("en-US", {
 });
 
 interface DashboardOverviewProps {
-  onNavigate: (view: "tasks" | "calendar" | "goals" | "links" | "study") => void;
+  onNavigate: (view: "tasks" | "calendar" | "goals" | "links") => void;
 }
 
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

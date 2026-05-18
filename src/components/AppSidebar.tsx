@@ -5,7 +5,6 @@ import {
   Calendar,
   Link2,
   Target,
-  BookOpen,
   ChevronLeft,
   ChevronRight,
   ClipboardPaste,
@@ -13,7 +12,7 @@ import {
 } from "lucide-react";
 import { useEditMode } from "@/components/EditModeContext";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "study" | "quickadd";
+type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "quickadd";
 interface AppSidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
@@ -26,7 +25,7 @@ const navItems: { id: View; label: string; icon: React.ElementType }[] = [
   { id: "goals", label: "Goals", icon: Target },
   { id: "quickadd", label: "Quick Add", icon: ClipboardPaste },
   { id: "links", label: "Quick Links", icon: Link2 },
-  { id: "study", label: "Study Tools", icon: BookOpen },
+  
 ];
 
 const AppSidebar = ({ activeView, onViewChange }: AppSidebarProps) => {
