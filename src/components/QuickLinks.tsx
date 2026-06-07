@@ -93,11 +93,9 @@ const QuickLinks = () => {
           <h2 className="text-2xl font-serif text-foreground">Quick Links</h2>
           <p className="text-muted-foreground text-sm mt-1">Jump to your favorite sites and apps</p>
         </div>
-        {editMode && (
-          <button onClick={() => setShowAdd(!showAdd)} className="p-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-            <Plus size={18} />
-          </button>
-        )}
+        <button onClick={() => setShowAdd(!showAdd)} className="p-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity" aria-label="Add link">
+          <Plus size={18} />
+        </button>
       </div>
 
       {showAdd && editMode && (
