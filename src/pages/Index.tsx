@@ -7,7 +7,7 @@ const Header = () => {
   return (
     <header className="border-b border-border">
       <div className="max-w-4xl mx-auto px-6 lg:px-8 py-5 flex items-center justify-between">
-        <h1 className="text-2xl font-serif text-foreground tracking-tight">E Link</h1>
+        <h1 className="text-2xl font-serif text-foreground tracking-tight">evlink</h1>
         <button
           onClick={toggleEditMode}
           className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
