@@ -1,30 +1,18 @@
-import { useState } from "react";
-import AppSidebar from "@/components/AppSidebar";
-import DashboardOverview from "@/components/DashboardOverview";
-import TaskManager from "@/components/TaskManager";
-import CalendarView from "@/components/CalendarView";
 import QuickLinks from "@/components/QuickLinks";
-import GoalsTracker from "@/components/GoalsTracker";
-import QuickAddFromLink from "@/components/QuickAddFromLink";
 import { EditModeProvider } from "@/components/EditModeContext";
 
-type View = "dashboard" | "tasks" | "calendar" | "links" | "goals" | "quickadd";
-
 const Index = () => {
-  const [activeView, setActiveView] = useState<View>("dashboard");
-
   return (
     <EditModeProvider>
-      <div className="flex h-screen overflow-hidden">
-        <AppSidebar activeView={activeView} onViewChange={setActiveView} />
-        <main className="flex-1 overflow-y-auto">
+      <div className="min-h-screen bg-background">
+        <header className="border-b border-border">
+          <div className="max-w-4xl mx-auto px-6 lg:px-8 py-5">
+            <h1 className="text-2xl font-serif text-foreground tracking-tight">E Link</h1>
+          </div>
+        </header>
+        <main>
           <div className="max-w-4xl mx-auto p-6 lg:p-8">
-            {activeView === "dashboard" && <DashboardOverview onNavigate={setActiveView} />}
-            {activeView === "tasks" && <TaskManager />}
-            {activeView === "calendar" && <CalendarView />}
-            {activeView === "links" && <QuickLinks />}
-            {activeView === "goals" && <GoalsTracker />}
-            {activeView === "quickadd" && <QuickAddFromLink />}
+            <QuickLinks />
           </div>
         </main>
       </div>
